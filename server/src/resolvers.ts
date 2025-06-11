@@ -23,7 +23,6 @@ export const products = [
 
 export const resolvers = {
   Query: {
-    hello: () => "Hello from Apollo Server!",
     getProducts: () => {
       return products;
     },
