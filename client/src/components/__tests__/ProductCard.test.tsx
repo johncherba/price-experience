@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ProductCard from "../ProductCard";
 import { MockedProvider } from "@apollo/client/testing";
 import { gql } from "@apollo/client";
-import { cleanup } from "@testing-library/react";
-afterEach(cleanup);
+// import { cleanup } from "@testing-library/react";
+// afterEach(cleanup);
 
 const GET_PRODUCTS = gql`
   query GetProducts {
