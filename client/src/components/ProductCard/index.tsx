@@ -1,46 +1,37 @@
-// components/ProductCard.tsx
-import { gql, useQuery } from "@apollo/client";
+// ProductCard.tsx
+import React from "react";
+import { useQuery, gql } from "@apollo/client";
 
 const GET_PRODUCTS = gql`
   query GetProducts {
     getProducts {
       id
-      category
       brand
+      category
       price
     }
   }
 `;
 
-type Products = {
-  id: Number;
-  category: String;
-  brand: String;
-  price: GLfloat;
-};
+const ProductCard: React.FC = () => {
+  const { data, loading, error } = useQuery(GET_PRODUCTS);
 
-const ProductCard = () => {
-  const {
-    data: getProductsData,
-    loading: getProductsLoading,
-    error: getProductsError,
-  } = useQuery(GET_PRODUCTS);
+  if (loading) return <p>Loading product...</p>;
+  if (error)
+    return <p data-testid="error-message">Error: Failed to fetch products</p>;
 
-  if (getProductsLoading) return <p>Loading...</p>;
-  if (getProductsError) return <p>Error: {getProductsError.message}</p>;
+  const product = data?.getProducts?.[0] || null;
 
-  //   console.log(getProductsData.getProducts);
+  if (!product) return <p>No product found.</p>;
 
   return (
-    <>
-      {getProductsData.getProducts.map((products: Products, index: number) => (
-        <div key={index}>
-          <div>{products.category}</div>
-          <div>{products.brand}</div>
-          <div>${products.price}</div>
-        </div>
-      ))}
-    </>
+    <div>
+      <h2>First Product</h2>
+      <p>
+        <strong>{product.brand}</strong> - {product.category} - $
+        {product.price.toFixed(2)}
+      </p>
+    </div>
   );
 };
 
