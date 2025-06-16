@@ -1,100 +1,83 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import ProductCard from "../ProductCard";
-import { MockedProvider } from "@apollo/client/testing";
-import { gql } from "@apollo/client";
-// import { cleanup } from "@testing-library/react";
-// afterEach(cleanup);
 
-const GET_PRODUCTS = gql`
-  query GetProducts {
-    getProducts {
-      id
-      brand
-      category
-      price
-    }
-  }
-`;
+afterEach(() => {
+  cleanup();
+  jest.resetAllMocks();
+});
 
-const mockedProduct = {
+const mockProduct = {
   id: "1",
   brand: "Sony",
   category: "Audio",
   price: 299.99,
 };
 
-const successMock = [
-  {
-    request: { query: GET_PRODUCTS },
-    result: {
-      data: { getProducts: [mockedProduct] },
-    },
+const mockSuccessResponse = {
+  data: {
+    getProducts: [mockProduct],
   },
-];
+};
 
-const emptyMock = [
-  {
-    request: { query: GET_PRODUCTS },
-    result: {
-      data: { getProducts: [] },
-    },
+const mockEmptyResponse = {
+  data: {
+    getProducts: [],
   },
-];
+};
 
-const errorMock = [
-  {
-    request: { query: GET_PRODUCTS },
-    error: new Error("Network error"),
-  },
-];
+const mockErrorResponse = {
+  errors: [{ message: "Network error" }],
+};
 
 describe("ProductCard", () => {
   it("renders loading state initially", () => {
-    render(
-      <MockedProvider mocks={[]} addTypename={false}>
-        <ProductCard />
-      </MockedProvider>
+    // Don't resolve fetch to simulate loading
+    jest.spyOn(global, "fetch").mockImplementation(
+      () => new Promise(() => {}) // keep pending
     );
+
+    render(<ProductCard />);
     expect(screen.getByText(/loading product/i)).toBeInTheDocument();
   });
 
-  it("renders the first product after fetch", async () => {
-    render(
-      <MockedProvider mocks={successMock} addTypename={false}>
-        <ProductCard />
-      </MockedProvider>
-    );
+  it("renders the first product after successful fetch", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockSuccessResponse,
+    } as Response);
+
+    render(<ProductCard />);
 
     await waitFor(() => {
       expect(screen.getByText(/First Product/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sony/i)).toBeInTheDocument();
+      expect(screen.getByText(/Audio/i)).toBeInTheDocument();
+      expect(screen.getByText(/\$299.99/)).toBeInTheDocument();
     });
-
-    expect(screen.getByText(/Sony/i)).toBeInTheDocument();
-    expect(screen.getByText(/Audio/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$299.99/)).toBeInTheDocument();
   });
 
-  it("renders an error message on fetch failure", async () => {
-    render(
-      <MockedProvider mocks={errorMock} addTypename={false}>
-        <ProductCard />
-      </MockedProvider>
-    );
+  it("renders no product message when product list is empty", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockEmptyResponse,
+    } as Response);
 
-    const errorMessage = await screen.findByTestId("error-message");
-    expect(errorMessage).toHaveTextContent("Error: Failed to fetch products");
-  });
-
-  it("renders no product message if product list is empty", async () => {
-    render(
-      <MockedProvider mocks={emptyMock} addTypename={false}>
-        <ProductCard />
-      </MockedProvider>
-    );
+    render(<ProductCard />);
 
     await waitFor(() => {
       expect(screen.getByText(/No product found/i)).toBeInTheDocument();
     });
+  });
+
+  it("renders an error message on fetch failure", async () => {
+    jest
+      .spyOn(global, "fetch")
+      .mockRejectedValueOnce(new Error("Fetch failed"));
+
+    render(<ProductCard />);
+
+    const errorMessage = await screen.findByTestId("error-message");
+    expect(errorMessage).toHaveTextContent("Error: Failed to fetch products");
   });
 });
