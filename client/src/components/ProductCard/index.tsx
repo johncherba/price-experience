@@ -57,12 +57,13 @@ const ProductCard: React.FC = () => {
   if (error) return <p data-testid="error-message">Error: {error}</p>;
   if (!product) return <p>No product found.</p>;
 
+  const { id, brand, category, price } = product;
+
   return (
     <div>
       <h2>First Product</h2>
       <p>
-        <strong>{product.brand}</strong> - {product.category} - $
-        {product.price.toFixed(2)}
+        <strong>{brand}</strong> - {category} - ${price.toFixed(2)}
       </p>
     </div>
   );
