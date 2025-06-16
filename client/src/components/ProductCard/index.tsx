@@ -1,6 +1,16 @@
-// ProductCard.tsx
 import React from "react";
 import { useQuery, gql } from "@apollo/client";
+
+interface Product {
+  id: string;
+  brand: string;
+  category: string;
+  price: number;
+}
+
+interface GetProductsData {
+  getProducts: Product[];
+}
 
 const GET_PRODUCTS = gql`
   query GetProducts {
@@ -14,13 +24,13 @@ const GET_PRODUCTS = gql`
 `;
 
 const ProductCard: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_PRODUCTS);
+  const { data, loading, error } = useQuery<GetProductsData>(GET_PRODUCTS);
 
   if (loading) return <p>Loading product...</p>;
   if (error)
     return <p data-testid="error-message">Error: Failed to fetch products</p>;
 
-  const product = data?.getProducts?.[0] || null;
+  const product = data?.getProducts?.[0];
 
   if (!product) return <p>No product found.</p>;
 
