@@ -29,7 +29,7 @@ npx cypress open
 ## Server testing
 
 ```
-cd client
+cd server
 npm run test
 ```
 
