@@ -24,12 +24,13 @@ const ProductCard: React.FC = () => {
 
   if (!product) return <p>No product found.</p>;
 
+  const { brand, category, price } = product;
+
   return (
     <div>
       <h2>First Product</h2>
       <p>
-        <strong>{product.brand}</strong> - {product.category} - $
-        {product.price.toFixed(2)}
+        <strong>{brand}</strong> - {category} - ${price.toFixed(2)}
       </p>
     </div>
   );
