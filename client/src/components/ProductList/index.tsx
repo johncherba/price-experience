@@ -1,6 +1,16 @@
-// ProductList.tsx
 import React from "react";
 import { useQuery, gql } from "@apollo/client";
+
+interface Product {
+  id: string;
+  brand: string;
+  category: string;
+  price: number;
+}
+
+interface GetProductsData {
+  getProducts: Product[];
+}
 
 const GET_PRODUCTS = gql`
   query GetProducts {
@@ -14,7 +24,7 @@ const GET_PRODUCTS = gql`
 `;
 
 const ProductList: React.FC = () => {
-  const { data, loading, error } = useQuery(GET_PRODUCTS);
+  const { data, loading, error } = useQuery<GetProductsData>(GET_PRODUCTS);
 
   if (loading) return <p>Loading products...</p>;
   if (error)
@@ -24,19 +34,12 @@ const ProductList: React.FC = () => {
     <div>
       <h2>Product List</h2>
       <ul>
-        {data.getProducts.map(
-          (product: {
-            id: string;
-            brand: string;
-            category: string;
-            price: number;
-          }) => (
-            <li key={product.id}>
-              <strong>{product.brand}</strong> - {product.category} - $
-              {product.price.toFixed(2)}
-            </li>
-          )
-        )}
+        {data?.getProducts.map((product) => (
+          <li key={product.id}>
+            <strong>{product.brand}</strong> - {product.category} - $
+            {product.price.toFixed(2)}
+          </li>
+        ))}
       </ul>
     </div>
   );
